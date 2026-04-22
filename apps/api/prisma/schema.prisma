@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Technician {
+  id           Int    @id @default(autoincrement())
+  email        String @unique
+  passwordHash String
+
+  @@map("technicians")
+}
+
+model Child {
+  id              String    @id
+  fullName        String
+  birthDate       DateTime
+  neighborhood    String
+  reviewedAt      DateTime?
+  reviewedBy      String?
+  health          HealthRecord?
+  education       EducationRecord?
+  social          SocialRecord?
+
+  @@map("children")
+}
+
+model HealthRecord {
+  id              Int      @id @default(autoincrement())
+  childId         String   @unique
+  child           Child    @relation(fields: [childId], references: [id])
+  lastVisit       DateTime?
+  vaccinesUpToDate Boolean
+  alerts          String   @default("[]")
+
+  @@map("health_records")
+}
+
+model EducationRecord {
+  id             Int    @id @default(autoincrement())
+  childId        String @unique
+  child          Child  @relation(fields: [childId], references: [id])
+  school         String
+  attendanceRate Float
+  alerts         String @default("[]")
+
+  @@map("education_records")
+}
+
+model SocialRecord {
+  id            Int    @id @default(autoincrement())
+  childId       String @unique
+  child         Child  @relation(fields: [childId], references: [id])
+  benefit       String
+  benefitStatus String
+  alerts        String @default("[]")
+
+  @@map("social_records")
+}

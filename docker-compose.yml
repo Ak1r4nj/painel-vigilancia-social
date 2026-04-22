@@ -1,0 +1,39 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    ports:
+      - '3001:3001'
+    environment:
+      DATABASE_URL: file:/data/painel.db
+      JWT_SECRET: ${JWT_SECRET:-super-secret-change-in-prod}
+      JWT_EXPIRES_IN: '3600'
+      PORT: '3001'
+      CORS_ORIGIN: http://localhost:3000
+      NODE_ENV: production
+    volumes:
+      - api_data:/data
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3001/health']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NODE_ENV: production
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  api_data:
