@@ -1,5 +1,4 @@
 import type { FastifyInstance } from 'fastify';
-import rateLimit from '@fastify/rate-limit';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 
@@ -9,17 +8,19 @@ const loginSchema = z.object({
 });
 
 export async function authRoutes(app: FastifyInstance) {
-  app.register(rateLimit, {
-    max: 5,
-    timeWindow: '1 minute',
-    keyGenerator: (req) => req.ip,
-    errorResponseBuilder: () => ({
-      error: 'rate_limit_exceeded',
-      message: 'Muitas tentativas. Aguarde 1 minuto.',
-    }),
-  });
-
-  app.post('/token', async (request, reply) => {
+  // Rate limit específico para login: 5 tentativas/min por IP (NFR-01)
+  app.post('/token', {
+    config: {
+      rateLimit: {
+        max: 5,
+        timeWindow: '1 minute',
+        errorResponseBuilder: () => ({
+          error: 'rate_limit_exceeded',
+          message: 'Muitas tentativas. Aguarde 1 minuto.',
+        }),
+      },
+    },
+  }, async (request, reply) => {
     const body = loginSchema.safeParse(request.body);
     if (!body.success) {
       return reply.status(400).send({

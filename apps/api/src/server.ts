@@ -16,7 +16,11 @@ export async function buildApp() {
   const app = Fastify({ logger: { level: 'info' } });
 
   await app.register(helmet, { contentSecurityPolicy: false });
-  await app.register(cors, { origin: CORS_ORIGIN, credentials: true });
+  await app.register(cors, {
+    origin: CORS_ORIGIN,
+    credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+  });
   await app.register(rateLimit, { max: 100, timeWindow: '1 minute' });
 
   await app.register(prismaPlugin);
