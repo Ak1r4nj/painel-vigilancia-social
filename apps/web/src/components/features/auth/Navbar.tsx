@@ -24,9 +24,9 @@ export function Navbar() {
         </div>
         <div className="flex items-center gap-1">
           <ThemeToggle />
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2">
+          <Button variant="ghost" size="sm" onClick={handleLogout} aria-label="Sair da conta" className="gap-2">
             <LogOut className="h-4 w-4" aria-hidden />
-            <span className="hidden sm:inline">Sair</span>
+            <span className="hidden sm:inline" aria-hidden>Sair</span>
           </Button>
         </div>
       </div>

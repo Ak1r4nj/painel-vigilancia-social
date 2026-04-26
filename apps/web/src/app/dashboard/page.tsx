@@ -10,7 +10,7 @@ export default function DashboardPage() {
   return (
     <AuthGuard>
       <Navbar />
-      <main className="container py-6 space-y-8">
+      <main id="main-content" className="container py-6 space-y-8">
         <SummaryCards />
         <ChartsSection />
         <ChildList />

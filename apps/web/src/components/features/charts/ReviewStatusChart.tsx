@@ -35,46 +35,55 @@ export function ReviewStatusChart() {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="h-40 animate-pulse rounded bg-muted" />
+          <div className="h-40 animate-pulse rounded bg-muted" aria-hidden />
         ) : (
-          <ResponsiveContainer width="100%" height={160}>
-            <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                innerRadius={40}
-                outerRadius={65}
-                paddingAngle={3}
-                dataKey="value"
-                strokeWidth={0}
-              >
-                {chartData.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '0.5rem',
-                  color: 'hsl(var(--foreground))',
-                  fontSize: 12,
-                }}
-                formatter={(v: unknown) => {
-                  const n = v as number;
-                  return [`${n} (${total ? Math.round((n / total) * 100) : 0}%)`, ''];
-                }}
-              />
-              <Legend
-                iconType="circle"
-                iconSize={8}
-                formatter={(value) => (
-                  <span style={{ fontSize: 12, color: 'hsl(var(--muted-foreground))' }}>{value}</span>
-                )}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+          <figure aria-label="Gráfico de status de revisão">
+            {/* Resumo textual para leitores de tela */}
+            <figcaption className="sr-only">
+              {`Status de revisão: ${chartData[0].value} revisadas e ${chartData[1].value} pendentes de um total de ${total}.`}
+              {total > 0 && ` Taxa de revisão: ${Math.round((chartData[0].value / total) * 100)}%.`}
+            </figcaption>
+            <div role="img" aria-hidden>
+              <ResponsiveContainer width="100%" height={160}>
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={40}
+                    outerRadius={65}
+                    paddingAngle={3}
+                    dataKey="value"
+                    strokeWidth={0}
+                  >
+                    {chartData.map((_, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '0.5rem',
+                      color: 'hsl(var(--foreground))',
+                      fontSize: 12,
+                    }}
+                    formatter={(v: unknown) => {
+                      const n = v as number;
+                      return [`${n} (${total ? Math.round((n / total) * 100) : 0}%)`, ''];
+                    }}
+                  />
+                  <Legend
+                    iconType="circle"
+                    iconSize={8}
+                    formatter={(value) => (
+                      <span style={{ fontSize: 12, color: 'hsl(var(--muted-foreground))' }}>{value}</span>
+                    )}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </figure>
         )}
       </CardContent>
     </Card>

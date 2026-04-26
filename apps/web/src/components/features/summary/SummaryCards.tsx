@@ -15,18 +15,25 @@ interface StatCardProps {
 
 function StatCard({ title, value, icon, color, loading }: StatCardProps) {
   return (
-    <Card>
+    <Card
+      role="figure"
+      aria-label={loading ? `${title}: carregando` : `${title}: ${value ?? 'sem dados'}`}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        <CardTitle className="text-sm font-medium text-muted-foreground" aria-hidden>
+          {title}
+        </CardTitle>
         <span className={color} aria-hidden>
           {icon}
         </span>
       </CardHeader>
       <CardContent>
         {loading ? (
-          <div className="h-8 w-16 animate-pulse rounded bg-muted" />
+          <div className="h-8 w-16 animate-pulse rounded bg-muted" aria-hidden />
         ) : (
-          <p className="text-3xl font-bold">{value ?? '—'}</p>
+          <p className="text-3xl font-bold" aria-hidden>
+            {value ?? '—'}
+          </p>
         )}
       </CardContent>
     </Card>

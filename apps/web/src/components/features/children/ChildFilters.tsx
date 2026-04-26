@@ -120,8 +120,11 @@ export function ChildFilters({ params, onChange }: Props) {
           <Filter className="h-4 w-4" aria-hidden />
           Filtros
           {hasActive && (
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-              !
+            <span
+              className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground"
+              aria-label="filtros ativos"
+            >
+              <span aria-hidden>!</span>
             </span>
           )}
         </Button>
