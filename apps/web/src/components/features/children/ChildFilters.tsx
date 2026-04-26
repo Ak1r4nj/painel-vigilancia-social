@@ -107,8 +107,8 @@ export function ChildFilters({ params, onChange }: Props) {
 
   return (
     <div>
-      {/* Mobile: toggle drawer */}
-      <div className="md:hidden">
+      {/* Mobile: toggle button (only visible on small screens) */}
+      <div className="md:hidden mb-3">
         <Button
           variant="outline"
           size="sm"
@@ -125,15 +125,15 @@ export function ChildFilters({ params, onChange }: Props) {
             </span>
           )}
         </Button>
-        {open && (
-          <div id="filter-panel" className="mt-3">
-            {FilterPanel}
-          </div>
-        )}
       </div>
 
-      {/* Desktop: sempre visível */}
-      <div className="hidden md:block">{FilterPanel}</div>
+      {/* Filters: rendered once — hidden on mobile unless open, always visible on desktop */}
+      <div
+        id="filter-panel"
+        className={open ? 'block md:block' : 'hidden md:block'}
+      >
+        {FilterPanel}
+      </div>
     </div>
   );
 }
