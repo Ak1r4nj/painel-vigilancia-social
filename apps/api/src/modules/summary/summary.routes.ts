@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { authenticate } from '../../plugins/jwt.js';
+import { hasActiveAlerts } from '../../lib/alerts.js';
 
 export async function summaryRoutes(app: FastifyInstance) {
   app.addHook('onRequest', authenticate);
@@ -44,5 +45,27 @@ export async function summaryRoutes(app: FastifyInstance) {
       educationAlerts: educationAlertCount,
       socialAlerts: socialAlertCount,
     };
+  });
+
+  // GET /summary/neighborhoods — dados agregados por bairro para o mapa de calor
+  app.get('/neighborhoods', async () => {
+    const children = await app.prisma.child.findMany({
+      include: { health: true, education: true, social: true },
+    });
+
+    // Agrupa por bairro
+    const map = new Map<string, { total: number; withAlerts: number; reviewed: number }>();
+
+    for (const child of children) {
+      const entry = map.get(child.neighborhood) ?? { total: 0, withAlerts: 0, reviewed: 0 };
+      entry.total += 1;
+      if (hasActiveAlerts(child)) entry.withAlerts += 1;
+      if (child.reviewedAt !== null) entry.reviewed += 1;
+      map.set(child.neighborhood, entry);
+    }
+
+    return Array.from(map.entries())
+      .map(([neighborhood, stats]) => ({ neighborhood, ...stats }))
+      .sort((a, b) => b.withAlerts - a.withAlerts); // maior risco primeiro
   });
 }

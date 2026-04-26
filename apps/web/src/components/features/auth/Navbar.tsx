@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { clearToken } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/features/theme/ThemeToggle';
 import { Shield, LogOut } from 'lucide-react';
 
 export function Navbar() {
@@ -21,10 +22,13 @@ export function Navbar() {
           <span className="font-semibold text-sm sm:text-base">Vigilância Social</span>
           <span className="hidden text-xs text-muted-foreground sm:inline">— Prefeitura do Rio</span>
         </div>
-        <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2">
-          <LogOut className="h-4 w-4" aria-hidden />
-          <span className="hidden sm:inline">Sair</span>
-        </Button>
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2">
+            <LogOut className="h-4 w-4" aria-hidden />
+            <span className="hidden sm:inline">Sair</span>
+          </Button>
+        </div>
       </div>
     </header>
   );

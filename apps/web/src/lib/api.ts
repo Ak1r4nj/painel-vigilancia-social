@@ -77,8 +77,19 @@ export interface Summary {
   socialAlerts: number;
 }
 
+export interface NeighborhoodStat {
+  neighborhood: string;
+  total: number;
+  withAlerts: number;
+  reviewed: number;
+}
+
 export async function getSummary(): Promise<Summary> {
   return apiFetch<Summary>('/summary');
+}
+
+export async function getNeighborhoodStats(): Promise<NeighborhoodStat[]> {
+  return apiFetch<NeighborhoodStat[]>('/summary/neighborhoods');
 }
 
 // --- Children ---
