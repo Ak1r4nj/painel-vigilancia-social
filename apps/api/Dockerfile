@@ -1,30 +1,21 @@
-### Estágio 1: dependências de produção
-FROM node:20-alpine AS deps
-WORKDIR /app
-# Copia manifests do workspace raiz + api
-COPY package.json package-lock.json ./
-COPY apps/api/package.json ./apps/api/package.json
-# npm workspaces hoista tudo para root/node_modules
-RUN npm ci --workspace=apps/api --omit=dev
-
-### Estágio 2: build (instala root + api para ter tsc, tsx e demais devDeps)
+### Estágio 1: build — usa node_modules pré-instalados do host (sem acesso à internet)
 FROM node:20-alpine AS build
 WORKDIR /app
+
 COPY package.json package-lock.json ./
 COPY apps/api/package.json ./apps/api/package.json
-# Instala TUDO da raiz (inclui typescript do root devDeps)
-RUN npm ci --workspace=apps/api --include-workspace-root
-
-COPY apps/api ./apps/api
 COPY tsconfig.base.json ./
 
-WORKDIR /app/apps/api
-# Gera o Prisma Client (vai para /app/node_modules/.prisma)
-RUN npx prisma generate
-# Compila TypeScript (src/ + prisma/seed.ts → dist/)
-RUN npm run build
+# Copia node_modules pré-instalados (inclui binários Linux gerados pelo prisma generate)
+COPY node_modules ./node_modules
 
-### Estágio 3: imagem final
+COPY apps/api ./apps/api
+
+WORKDIR /app/apps/api
+# Compila TypeScript (src/ + prisma/seed.ts → dist/)
+RUN node_modules/.bin/tsc -p tsconfig.json
+
+### Estágio 2: imagem final
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
@@ -34,10 +25,8 @@ RUN apk add --no-cache openssl
 
 RUN addgroup -g 1001 -S nodejs && adduser -S api -u 1001
 
-# Dependências de produção (hoistadas pelo npm workspaces)
-COPY --from=deps /app/node_modules ./node_modules
-# Prisma Client gerado (não existe nos deps, só após generate no build)
-COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
+# node_modules completo (inclui prod + Prisma client com binários Linux)
+COPY --from=build /app/node_modules ./node_modules
 # Código compilado
 COPY --from=build /app/apps/api/dist ./dist
 # Schema + migrations (necessários para prisma migrate deploy)

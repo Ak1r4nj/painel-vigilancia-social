@@ -1,16 +1,12 @@
-### Estágio 1: dependências de produção
-FROM node:20-alpine AS deps
-WORKDIR /app
-COPY package.json package-lock.json ./
-COPY apps/web/package.json ./apps/web/package.json
-RUN npm ci --workspace=apps/web --omit=dev
-
-### Estágio 2: build
+### Estágio 1: build — usa node_modules pré-instalados do host (sem acesso à internet)
 FROM node:20-alpine AS build
 WORKDIR /app
+
 COPY package.json package-lock.json ./
 COPY apps/web/package.json ./apps/web/package.json
-RUN npm ci --workspace=apps/web
+
+# Copia node_modules pré-instalados do host
+COPY node_modules ./node_modules
 
 COPY apps/web ./apps/web
 
@@ -18,9 +14,9 @@ WORKDIR /app/apps/web
 ENV NEXT_TELEMETRY_DISABLED=1
 ARG NEXT_PUBLIC_API_URL=http://localhost:3001
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-RUN npm run build
+RUN node_modules/.bin/next build
 
-### Estágio 3: runner
+### Estágio 2: runner
 # Em monorepo, Next.js standalone gera server.js em apps/web/ dentro do diretório standalone
 FROM node:20-alpine AS runner
 WORKDIR /app

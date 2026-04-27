@@ -1,0 +1,18 @@
+# Artefatos de build que serão gerados dentro do Docker
+apps/api/dist
+apps/web/.next
+
+# Arquivos de dev/test desnecessários na imagem
+apps/web/e2e
+apps/web/playwright-report
+apps/web/test-results
+apps/web/e2e/.auth.json
+
+# Git e editor
+.git
+.gitignore
+*.md
+
+# Env locais
+**/.env
+**/.env.local
