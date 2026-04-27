@@ -6,10 +6,25 @@ import { getChildren, type ChildListParams } from '@/lib/api';
 import { ChildCard } from './ChildCard';
 import { ChildFilters } from './ChildFilters';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
-export function ChildList() {
-  const [params, setParams] = useState<ChildListParams>({ page: 1, pageSize: 20 });
+const AREA_LABEL: Record<string, string> = {
+  health: 'Alertas de Saúde',
+  education: 'Alertas de Educação',
+  social: 'Alertas de Assistência',
+};
+
+interface Props {
+  /** Params controlados externamente (ex.: clique nos cards de resumo). */
+  externalParams?: Partial<ChildListParams>;
+  onExternalParamsClear?: () => void;
+}
+
+export function ChildList({ externalParams, onExternalParamsClear }: Props) {
+  const [localParams, setLocalParams] = useState<ChildListParams>({ page: 1, pageSize: 20 });
+
+  // Mescla: params locais (filtros do painel) + externos (clique nos cards)
+  const params: ChildListParams = { ...localParams, ...externalParams, page: localParams.page };
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['children', params],
@@ -17,6 +32,10 @@ export function ChildList() {
   });
 
   const totalPages = data ? Math.ceil(data.total / data.pageSize) : 1;
+
+  function setPage(page: number) {
+    setLocalParams((p) => ({ ...p, page }));
+  }
 
   return (
     <section aria-label="Lista de crianças">
@@ -33,13 +52,50 @@ export function ChildList() {
         <h2 className="text-lg font-semibold">
           Crianças{' '}
           {data && (
-            <span className="text-sm font-normal text-muted-foreground" aria-hidden>({data.total} encontradas)</span>
+            <span className="text-sm font-normal text-muted-foreground" aria-hidden>
+              ({data.total} encontradas)
+            </span>
           )}
         </h2>
       </div>
 
+      {/* Chip de filtro externo ativo */}
+      {externalParams && Object.keys(externalParams).length > 0 && (
+        <div className="mb-3 flex items-center gap-2">
+          <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+            {externalParams.alertArea
+              ? AREA_LABEL[externalParams.alertArea]
+              : externalParams.reviewed === true
+                ? 'Revisadas'
+                : externalParams.reviewed === false
+                  ? 'Pendentes'
+                  : 'Filtro ativo'}
+          </span>
+          {onExternalParamsClear && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => {
+                onExternalParamsClear();
+                setLocalParams((p) => ({ ...p, page: 1 }));
+              }}
+              aria-label="Remover filtro do card de resumo"
+            >
+              <X className="h-3 w-3" aria-hidden />
+              Limpar
+            </Button>
+          )}
+        </div>
+      )}
+
       <div className="mb-4">
-        <ChildFilters params={params} onChange={setParams} />
+        <ChildFilters
+          params={localParams}
+          onChange={(p) => {
+            setLocalParams(p);
+          }}
+        />
       </div>
 
       {isError && (
@@ -80,20 +136,20 @@ export function ChildList() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setParams((p) => ({ ...p, page: (p.page ?? 1) - 1 }))}
-                disabled={(params.page ?? 1) <= 1}
+                onClick={() => setPage((localParams.page ?? 1) - 1)}
+                disabled={(localParams.page ?? 1) <= 1}
                 aria-label="Página anterior"
               >
                 <ChevronLeft className="h-4 w-4" aria-hidden />
               </Button>
               <span className="text-sm text-muted-foreground">
-                Página {params.page ?? 1} de {totalPages}
+                Página {localParams.page ?? 1} de {totalPages}
               </span>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setParams((p) => ({ ...p, page: (p.page ?? 1) + 1 }))}
-                disabled={(params.page ?? 1) >= totalPages}
+                onClick={() => setPage((localParams.page ?? 1) + 1)}
+                disabled={(localParams.page ?? 1) >= totalPages}
                 aria-label="Próxima página"
               >
                 <ChevronRight className="h-4 w-4" aria-hidden />

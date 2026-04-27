@@ -144,6 +144,7 @@ export interface ChildDetail {
 export interface ChildListParams {
   neighborhood?: string;
   hasAlerts?: boolean;
+  alertArea?: 'health' | 'education' | 'social';
   reviewed?: boolean;
   page?: number;
   pageSize?: number;
@@ -153,6 +154,7 @@ export async function getChildren(params: ChildListParams = {}): Promise<ChildLi
   const qs = new URLSearchParams();
   if (params.neighborhood) qs.set('neighborhood', params.neighborhood);
   if (params.hasAlerts !== undefined) qs.set('hasAlerts', String(params.hasAlerts));
+  if (params.alertArea) qs.set('alertArea', params.alertArea);
   if (params.reviewed !== undefined) qs.set('reviewed', String(params.reviewed));
   if (params.page) qs.set('page', String(params.page));
   if (params.pageSize) qs.set('pageSize', String(params.pageSize));
