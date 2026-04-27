@@ -26,7 +26,8 @@ async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
 
   if (res.status === 401) {
     clearToken();
-    if (typeof window !== 'undefined') {
+    // Só redireciona se não estiver já na página de login (evita loop de recarga)
+    if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
       window.location.href = '/login';
     }
     throw new Error('unauthorized');
@@ -46,11 +47,24 @@ export interface LoginResponse {
   expiresIn: number;
 }
 
+/**
+ * Login usa fetch direto (sem apiFetch) pois é um endpoint público e
+ * não deve acionar o redirect-on-401 da camada autenticada.
+ */
 export async function login(email: string, password: string): Promise<LoginResponse> {
-  return apiFetch<LoginResponse>('/auth/token', {
+  const res = await fetch(`${BASE_URL}/auth/token`, {
     method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw Object.assign(
+      new Error(body.message ?? 'Credenciais inválidas'),
+      { status: res.status, body },
+    );
+  }
+  return res.json();
 }
 
 // --- Summary ---

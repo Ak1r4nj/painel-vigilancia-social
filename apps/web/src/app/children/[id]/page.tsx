@@ -171,7 +171,6 @@ export default function ChildDetailPage() {
                   onClick={() => review()}
                   disabled={isReviewing}
                   className="min-w-[160px] gap-2"
-                  aria-label="Registrar revisão desta criança"
                 >
                   <ClipboardCheck className="h-4 w-4" aria-hidden />
                   {isReviewing ? 'Registrando…' : child.reviewedAt ? 'Revisitar' : 'Marcar como revisada'}
