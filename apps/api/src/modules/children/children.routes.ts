@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { authenticate } from '../../plugins/jwt.js';
 import { z } from 'zod';
+import { parseAlerts, hasActiveAlerts } from '../../lib/alerts.js';
 
 const listQuerySchema = z.object({
   neighborhood: z.string().optional(),
@@ -9,36 +10,6 @@ const listQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
 });
-
-function parseAlerts(json: string): string[] {
-  try {
-    return JSON.parse(json) as string[];
-  } catch {
-    return [];
-  }
-}
-
-function hasActiveAlerts(child: {
-  health: { alerts: string; vaccinesUpToDate: boolean; lastVisit: Date | null } | null;
-  education: { alerts: string; attendanceRate: number } | null;
-  social: { alerts: string; benefitStatus: string } | null;
-}): boolean {
-  if (child.health) {
-    if (!child.health.vaccinesUpToDate) return true;
-    if (
-      child.health.lastVisit &&
-      (Date.now() - child.health.lastVisit.getTime()) / (1000 * 60 * 60 * 24) > 180
-    )
-      return true;
-  }
-  if (child.education && child.education.attendanceRate < 75) return true;
-  if (
-    child.social &&
-    (child.social.benefitStatus === 'SUSPENDED' || child.social.benefitStatus === 'CANCELLED')
-  )
-    return true;
-  return false;
-}
 
 export async function childrenRoutes(app: FastifyInstance) {
   app.addHook('onRequest', authenticate);
