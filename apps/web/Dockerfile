@@ -14,7 +14,7 @@ WORKDIR /app/apps/web
 ENV NEXT_TELEMETRY_DISABLED=1
 ARG NEXT_PUBLIC_API_URL=http://localhost:3001
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-RUN node_modules/.bin/next build
+RUN /app/node_modules/.bin/next build
 
 ### Estágio 2: runner
 # Em monorepo, Next.js standalone gera server.js em apps/web/ dentro do diretório standalone

@@ -13,7 +13,7 @@ COPY apps/api ./apps/api
 
 WORKDIR /app/apps/api
 # Compila TypeScript (src/ + prisma/seed.ts → dist/)
-RUN node_modules/.bin/tsc -p tsconfig.json
+RUN /app/node_modules/.bin/tsc -p tsconfig.json
 
 ### Estágio 2: imagem final
 FROM node:20-alpine AS runner
