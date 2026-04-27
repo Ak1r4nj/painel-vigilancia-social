@@ -6,6 +6,7 @@ import { parseAlerts, hasActiveAlerts } from '../../lib/alerts.js';
 const listQuerySchema = z.object({
   neighborhood: z.string().optional(),
   hasAlerts: z.enum(['true', 'false']).optional(),
+  alertArea: z.enum(['health', 'education', 'social']).optional(),
   reviewed: z.enum(['true', 'false']).optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
@@ -24,7 +25,7 @@ export async function childrenRoutes(app: FastifyInstance) {
       });
     }
 
-    const { neighborhood, hasAlerts, reviewed, page, pageSize } = query.data;
+    const { neighborhood, hasAlerts, alertArea, reviewed, page, pageSize } = query.data;
 
     const allChildren = await app.prisma.child.findMany({
       where: {
@@ -48,6 +49,19 @@ export async function childrenRoutes(app: FastifyInstance) {
     if (hasAlerts !== undefined) {
       const want = hasAlerts === 'true';
       filtered = filtered.filter((c) => hasActiveAlerts(c) === want);
+    }
+
+    // Filtra por área de alerta específica
+    if (alertArea) {
+      filtered = filtered.filter((c) => {
+        if (alertArea === 'health')
+          return c.health !== null && parseAlerts(c.health.alerts).length > 0;
+        if (alertArea === 'education')
+          return c.education !== null && parseAlerts(c.education.alerts).length > 0;
+        if (alertArea === 'social')
+          return c.social !== null && parseAlerts(c.social.alerts).length > 0;
+        return true;
+      });
     }
 
     filtered.sort((a, b) => {

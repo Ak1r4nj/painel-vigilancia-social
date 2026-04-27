@@ -17,15 +17,27 @@ const Ctx = createContext<TabsCtx>({ value: '', onChange: () => {} });
    Root
 ────────────────────────────────────────────── */
 interface TabsProps {
-  defaultValue: string;
+  /** Modo não-controlado: aba inicial. */
+  defaultValue?: string;
+  /** Modo controlado: aba atual (use junto com onValueChange). */
+  value?: string;
+  onValueChange?: (v: string) => void;
   children: React.ReactNode;
   className?: string;
 }
 
-export function Tabs({ defaultValue, children, className }: TabsProps) {
-  const [value, setValue] = useState(defaultValue);
+export function Tabs({ defaultValue = '', value, onValueChange, children, className }: TabsProps) {
+  const [internal, setInternal] = useState(defaultValue);
+  const controlled = value !== undefined;
+  const current = controlled ? value : internal;
+
+  function handleChange(v: string) {
+    if (!controlled) setInternal(v);
+    onValueChange?.(v);
+  }
+
   return (
-    <Ctx.Provider value={{ value, onChange: setValue }}>
+    <Ctx.Provider value={{ value: current, onChange: handleChange }}>
       <div className={className}>{children}</div>
     </Ctx.Provider>
   );
