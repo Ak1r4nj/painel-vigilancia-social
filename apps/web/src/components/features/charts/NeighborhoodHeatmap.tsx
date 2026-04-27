@@ -74,50 +74,78 @@ export function NeighborhoodHeatmap() {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="h-52 animate-pulse rounded bg-muted" />
+          <div className="h-52 animate-pulse rounded bg-muted" aria-hidden />
         ) : !data?.length ? (
           <p className="py-8 text-center text-sm text-muted-foreground">Sem dados de bairros.</p>
         ) : (
-          <ResponsiveContainer width="100%" height={data.length * 36 + 24}>
-            <BarChart
-              data={data}
-              layout="vertical"
-              margin={{ top: 4, right: 48, left: 4, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" horizontal={false} className="stroke-border" />
-              <XAxis
-                type="number"
-                allowDecimals={false}
-                tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                axisLine={false}
-                tickLine={false}
-                domain={[0, maxAlerts + 1]}
-              />
-              <YAxis
-                type="category"
-                dataKey="neighborhood"
-                width={120}
-                tick={{ fontSize: 11, fill: 'hsl(var(--foreground))' }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted)/0.3)' }} />
-              <Bar dataKey="withAlerts" radius={[0, 4, 4, 0]} maxBarSize={28}>
-                {data.map((d) => (
-                  <Cell
-                    key={d.neighborhood}
-                    fill={alertColor(d.withAlerts / maxAlerts)}
+          <figure aria-label="Mapa de calor por bairro">
+            {/* Tabela de dados para leitores de tela — substitui o gráfico de barras */}
+            <figcaption className="sr-only">
+              Bairros ordenados por número de alertas ativos:
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Bairro</th>
+                    <th scope="col">Alertas</th>
+                    <th scope="col">Total de crianças</th>
+                    <th scope="col">Revisadas</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.map((d) => (
+                    <tr key={d.neighborhood}>
+                      <td>{d.neighborhood}</td>
+                      <td>{d.withAlerts}</td>
+                      <td>{d.total}</td>
+                      <td>{d.reviewed}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </figcaption>
+            <div role="img" aria-hidden>
+              <ResponsiveContainer width="100%" height={data.length * 36 + 24}>
+                <BarChart
+                  data={data}
+                  layout="vertical"
+                  margin={{ top: 4, right: 48, left: 4, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} className="stroke-border" />
+                  <XAxis
+                    type="number"
+                    allowDecimals={false}
+                    tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                    axisLine={false}
+                    tickLine={false}
+                    domain={[0, maxAlerts + 1]}
                   />
-                ))}
-                <LabelList
-                  dataKey="withAlerts"
-                  position="right"
-                  style={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                  formatter={(v: unknown) => ((v as number) > 0 ? (v as number) : '')}
-                />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+                  <YAxis
+                    type="category"
+                    dataKey="neighborhood"
+                    width={120}
+                    tick={{ fontSize: 11, fill: 'hsl(var(--foreground))' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted)/0.3)' }} />
+                  <Bar dataKey="withAlerts" radius={[0, 4, 4, 0]} maxBarSize={28}>
+                    {data.map((d) => (
+                      <Cell
+                        key={d.neighborhood}
+                        fill={alertColor(d.withAlerts / maxAlerts)}
+                      />
+                    ))}
+                    <LabelList
+                      dataKey="withAlerts"
+                      position="right"
+                      style={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                      formatter={(v: unknown) => ((v as number) > 0 ? (v as number) : '')}
+                    />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </figure>
         )}
       </CardContent>
     </Card>

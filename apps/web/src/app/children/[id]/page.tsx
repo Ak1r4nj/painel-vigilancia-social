@@ -121,7 +121,7 @@ export default function ChildDetailPage() {
   return (
     <AuthGuard>
       <Navbar />
-      <main className="container py-6">
+      <main id="main-content" className="container py-6">
         <Button variant="ghost" size="sm" onClick={() => router.back()} className="mb-4 gap-2">
           <ArrowLeft className="h-4 w-4" aria-hidden />
           Voltar

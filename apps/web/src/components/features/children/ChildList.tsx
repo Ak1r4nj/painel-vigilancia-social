@@ -20,11 +20,20 @@ export function ChildList() {
 
   return (
     <section aria-label="Lista de crianças">
+      {/* Região live: anuncia mudança de resultados para leitores de tela */}
+      <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+        {!isLoading && data !== undefined && (
+          data.total === 0
+            ? 'Nenhuma criança encontrada com os filtros aplicados.'
+            : `${data.total} ${data.total === 1 ? 'criança encontrada' : 'crianças encontradas'}.`
+        )}
+      </div>
+
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-lg font-semibold">
           Crianças{' '}
           {data && (
-            <span className="text-sm font-normal text-muted-foreground">({data.total} encontradas)</span>
+            <span className="text-sm font-normal text-muted-foreground" aria-hidden>({data.total} encontradas)</span>
           )}
         </h2>
       </div>

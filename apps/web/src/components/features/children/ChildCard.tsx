@@ -16,8 +16,20 @@ export function ChildCard({ child }: Props) {
     (child.alertCount.education ?? 0) +
     (child.alertCount.social ?? 0);
 
+  const alertDescription = child.hasAlerts
+    ? `${alertTotal} alerta${alertTotal !== 1 ? 's' : ''}`
+    : 'sem alertas';
+  const reviewDescription = child.reviewedAt
+    ? `revisada em ${formatDate(child.reviewedAt)}`
+    : 'revisão pendente';
+  const linkLabel = `${child.fullName}, ${age} anos, ${child.neighborhood} — ${alertDescription} — ${reviewDescription}`;
+
   return (
-    <Link href={`/children/${child.id}`} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg">
+    <Link
+      href={`/children/${child.id}`}
+      aria-label={linkLabel}
+      className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
+    >
       <Card className={`transition-shadow hover:shadow-md ${child.hasAlerts ? 'border-l-4 border-l-destructive' : ''}`}>
         <CardContent className="flex items-start justify-between gap-3 p-4">
           <div className="min-w-0 flex-1">
@@ -52,7 +64,7 @@ export function ChildCard({ child }: Props) {
                 Revisada em {formatDate(child.reviewedAt)}
               </span>
             ) : (
-              <span className="text-xs text-amber-600 font-medium">Pendente</span>
+              <span className="text-xs font-medium text-amber-800 dark:text-amber-400">Pendente</span>
             )}
           </div>
         </CardContent>

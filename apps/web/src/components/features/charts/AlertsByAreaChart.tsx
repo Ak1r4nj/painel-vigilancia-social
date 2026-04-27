@@ -36,40 +36,49 @@ export function AlertsByAreaChart() {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="h-40 animate-pulse rounded bg-muted" />
+          <div className="h-40 animate-pulse rounded bg-muted" aria-hidden />
         ) : (
-          <ResponsiveContainer width="100%" height={160}>
-            <BarChart data={chartData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-              <XAxis
-                dataKey="area"
-                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                allowDecimals={false}
-                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '0.5rem',
-                  color: 'hsl(var(--foreground))',
-                  fontSize: 12,
-                }}
-                formatter={(v: unknown) => [v as number, 'Alertas']}
-              />
-              <Bar dataKey="alertas" radius={[4, 4, 0, 0]} maxBarSize={60}>
-                {chartData.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <figure aria-label="Gráfico de alertas por área">
+            {/* Resumo textual para leitores de tela */}
+            <figcaption className="sr-only">
+              Alertas por área:{' '}
+              {chartData.map((d) => `${d.area}: ${d.alertas}`).join(', ')}.
+            </figcaption>
+            <div role="img" aria-hidden>
+              <ResponsiveContainer width="100%" height={160}>
+                <BarChart data={chartData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                  <XAxis
+                    dataKey="area"
+                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    allowDecimals={false}
+                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '0.5rem',
+                      color: 'hsl(var(--foreground))',
+                      fontSize: 12,
+                    }}
+                    formatter={(v: unknown) => [v as number, 'Alertas']}
+                  />
+                  <Bar dataKey="alertas" radius={[4, 4, 0, 0]} maxBarSize={60}>
+                    {chartData.map((_, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </figure>
         )}
       </CardContent>
     </Card>
